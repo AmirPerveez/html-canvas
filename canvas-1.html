@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>Assignment simple Paint App</title>
+</head>
+<style>
+canvas{
+border: 1px solid black;
+margin:0 0 1.4em 0;
+padding:0 1.4em 1.4em 1.4em;
+position:relative;
+left:260px;
+top:15px;
+  } 
+</style>
+
+<body onload="begin()">
+
+
+<div align="center">
+    <h2>Module 1:</h2>
+</div>
+<canvas id="canvasId" width="800" height="400" style="border: 3px black solid"></canvas>
+
+<div style="position:absolute;bottom:100px;left:1000px">
+    <button type="button" onclick="Module1Clr()">M1 clear</button>
+</div>
+
+<div align="center">
+    <h2>Module 2:</h2>
+</div>
+<canvas id="canvasId_2" width="800" height="375" style="border: 3px black solid"></canvas>
+
+<div style="position:absolute;bottom:-400px;left:1000px">
+    <button type="button" onclick="Module2Clr()">M2 Clear</button>
+</div>
+<script>
+function begin()
+{
+ canvasObj = document.getElementById('canvasId');
+ contex = canvasObj.getContext('2d');
+ canvasObj.addEventListener('mousedown',Module1MouseDown,false);
+ canvasObj.addEventListener('mouseup',Module1MouseUp,false);
+ canvasObj.addEventListener('mousemove',Module1MouseMove,false);
+ 
+ 
+ numoftri = [];
+ triangleColors =["red","orange","green","blue","purple","yellow"];
+ colorIndex = 0;
+ flag = false;
+ cursorOnTraingle = false;
+
+ canvasObj2 = document.getElementById('canvasId_2');
+ contex2 = canvasObj2.getContext('2d');
+ canvasObj2.addEventListener('mousedown',Module2MouseDown,false);
+ canvasObj2.addEventListener('mouseup',Module2MouseUp,false);
+ canvasObj2.addEventListener('mousemove',Module2MouseMove,false);
+ canvasObj2.addEventListener('dblclick',Module2DeleteOnDoubleClick,false);
+ 
+ numoftri2 = [];
+ triangleColors2 =["red","orange","green","blue","purple","yellow"];
+ colorIndex2 = 0;
+ flag2 = false;
+ drag = false;
+ 
+ canvasObj2.onselectstart = function() { return false; };
+ canvasObj.onselectstart = function() { return false; };
+}
+ 
+ 
+ function Module1MouseDown(e)
+ {
+ var pos = getModule1MousePosition(canvasObj, e);
+ MouseX = pos.x;
+  MouseY = pos.y;
+ ab = true;
+ if(numoftri !== null)
+ {
+for(var j=0;j<numoftri.length;j++)
+ {
+  intializePath(numoftri[j]);
+  if(contex.isPointInPath(MouseX, MouseY))
+  {
+   colorIndex = j;
+   cursorOnTraingle = true;						
+  }
+   }
+  }
+    }
+ 
+ 
+ function Module1MouseMove(e)
+   {
+  var pos = getModule1MousePosition(canvasObj, e);
+if(ab)
+  {
+  mmx = pos.x;
+   mmy = pos.y;
+if(!cursorOnTraingle)
+ {
+ contex.clearRect(0,0,canvasObj.width,canvasObj.height);
+ Module1TriangleDraw();
+ }
+ }
+ }
+ 
+
+ function Module1MouseUp()
+  {
+   ab = false;
+   cursorOnTraingle = false;
+  if(flag)
+ {
+ var colorIndex = Math.floor(Math.random() * 6);
+ contex.fillStyle = triangleColors[colorIndex];
+ contex.fill();
+numoftri.push({X:0,Y:0,x0:MouseX,y0:MouseY,x1:mmx,y1:mmy,x2:MouseX+(MouseX-mmx),y2:mmy,col:colorIndex});
+flag = false;
+ }
+ }
+
+
+ function Module1TriangleDraw()
+ {
+  if(numoftri !== null)
+  {
+  for( var i=0;i<numoftri.length;i++)
+  {
+    redraw(numoftri[i]);
+  }
+  }
+   contex.beginPath();
+   contex.moveTo(MouseX,MouseY);
+   contex.lineTo(mmx,mmy);
+   contex.lineTo(MouseX+(MouseX-mmx),mmy);
+   contex.closePath();
+   contex.stroke();
+  flag = true;
+  }
+
+
+  function redraw(numoftri)
+   {
+   contex.beginPath();
+   contex.moveTo(numoftri.x0+numoftri.X,numoftri.y0+numoftri.Y);
+   contex.lineTo(numoftri.x1+numoftri.X,numoftri.y1+numoftri.Y);
+   contex.lineTo(numoftri.x2+numoftri.X,numoftri.y2+numoftri.Y);
+   contex.closePath();
+   contex.fillStyle = triangleColors[numoftri.col];
+   contex.fill();
+  }
+
+
+  function intializePath(numoftri)
+   {
+  contex.beginPath();
+  contex.moveTo(numoftri.x0+numoftri.X,numoftri.y0+numoftri.Y);
+  contex.lineTo(numoftri.x1+numoftri.X,numoftri.y1+numoftri.Y);
+  contex.lineTo(numoftri.x2+numoftri.X,numoftri.y2+numoftri.Y);
+  contex.closePath();
+  }
+
+
+  function drawMoveTri()
+  {
+  for(var k=0;k<numoftri.length;k++)
+   {
+  contex.beginPath();
+  contex.moveTo(numoftri[k].x0+numoftri[k].X,numoftri[k].y0+numoftri[k].Y);
+  contex.lineTo(numoftri[k].x1+numoftri[k].X,numoftri[k].y1+numoftri[k].Y);
+  contex.lineTo(numoftri[k].x2+numoftri[k].X,numoftri[k].y2+numoftri[k].Y);
+  contex.closePath();
+  contex.fillStyle = triangleColors[numoftri[k].col];
+  contex.fill();
+  }
+ }
+
+
+ function  getModule1MousePosition(canvasObj, e)
+  {
+  var rect = canvasObj.getBoundingClientRect(),
+  scaleX = canvasObj.width / rect.width,
+  scaleY = canvasObj.height / rect.height;
+  return {
+  x: (e.clientX - rect.left) * scaleX,
+   y: (e.clientY - rect.top) * scaleY
+   }
+   }
+
+
+   function Module1Clr()
+  {
+   numoftri = [];
+   flag = false;
+   cursorOnTraingle = false;
+   contex.clearRect(0,0,canvasObj.width,canvasObj.height);
+  }
+
+
+  function Module2DeleteOnDoubleClick(e)
+   {
+  var pos = getModule2MousePosition(canvasObj2, e);
+   dbX = pos.x;
+   dbY = pos.y;
+  if(numoftri2 !== null)
+  {
+  for(var j=0;j<numoftri2.length;j++)
+  {
+  intializePath2(numoftri2[j]);
+   if(contex2.isPointInPath(dbX,dbY))
+   {
+  numoftri2.splice(j,1);
+  contex2.clearRect(0,0,canvasObj2.width,canvasObj2.height);
+    drawMoveTri2();
+   }
+   }
+   }
+  }
+
+
+  function Module2MouseDown(e)
+  {
+   var pos = getModule2MousePosition(canvasObj2, e);
+   MouseX = pos.x;
+   MouseY = pos.y;
+   ab = true;
+  if(numoftri2 !== null)
+  {
+   for(var j=0;j<numoftri2.length;j++)
+   {
+    intializePath2(numoftri2[j]);
+   if(contex2.isPointInPath(MouseX, MouseY))
+   {
+   colorIndex2 = j;
+   drag = true;
+   }
+   }
+  }
+ }
+
+
+ function Module2MouseMove(e)
+   {
+  var pos = getModule2MousePosition(canvasObj2, e);
+   if(ab)
+   {
+    mmx = pos.x;
+   mmy = pos.y;
+  if(drag)
+  {
+  var newX = mmx-MouseX;
+   var newY = mmy-MouseY;
+   MouseX = mmx;
+   MouseY = mmy;
+   numoftri2[colorIndex2].X += newX;
+   numoftri2[colorIndex2].Y += newY;
+   contex2.clearRect(0,0,canvasObj2.width,canvasObj2.height);
+   drawMoveTri2();
+   }
+   else
+   {
+   contex2.clearRect(0,0,canvasObj2.width,canvasObj2.height);
+  Module2TriangleDraw();
+  }
+   }
+ }
+
+
+ function Module2MouseUp()
+   {
+   ab = false;
+  drag = false;
+   if(flag2)
+   {
+   var colorIndex2 = Math.floor(Math.random() * 6);
+   contex2.fillStyle = triangleColors2[colorIndex2];
+   contex2.fill();
+   numoftri2.push({X:0,Y:0,x0:MouseX,y0:MouseY,x1:mmx,y1:mmy,x2:MouseX+(MouseX-mmx),y2:mmy,col:colorIndex2});
+  flag2 = false;
+  }
+  }
+
+
+  function Module2TriangleDraw()
+   {
+  if(numoftri2 !== null)
+   {
+ for( var i=0;i<numoftri2.length;i++)
+   {
+   redraw2(numoftri2[i]);
+   }
+   }
+   contex2.beginPath();
+   contex2.moveTo(MouseX,MouseY);
+   contex2.lineTo(mmx,mmy);
+   contex2.lineTo(MouseX+(MouseX-mmx),mmy);
+   contex2.closePath();
+   contex2.stroke();
+   flag2 = true;
+   }
+
+
+   function redraw2(numoftri2)
+   {
+   contex2.beginPath();
+   contex2.moveTo(numoftri2.x0+numoftri2.X,numoftri2.y0+numoftri2.Y);
+   contex2.lineTo(numoftri2.x1+numoftri2.X,numoftri2.y1+numoftri2.Y);
+   contex2.lineTo(numoftri2.x2+numoftri2.X,numoftri2.y2+numoftri2.Y);
+   contex2.closePath();
+   contex2.fillStyle = triangleColors2[numoftri2.col];
+   contex2.fill();
+   }
+
+   
+   function intializePath2(numoftri2)
+   {
+   contex2.beginPath();
+  contex2.moveTo(numoftri2.x0+numoftri2.X,numoftri2.y0+numoftri2.Y);
+   contex2.lineTo(numoftri2.x1+numoftri2.X,numoftri2.y1+numoftri2.Y);
+   contex2.lineTo(numoftri2.x2+numoftri2.X,numoftri2.y2+numoftri2.Y);
+  contex2.closePath();
+  }
+   
+   
+   function drawMoveTri2()
+   {
+   for(var k=0;k<numoftri2.length;k++)
+   {
+  contex2.beginPath();
+   contex2.moveTo(numoftri2[k].x0+numoftri2[k].X,numoftri2[k].y0+numoftri2[k].Y);
+   contex2.lineTo(numoftri2[k].x1+numoftri2[k].X,numoftri2[k].y1+numoftri2[k].Y);
+   contex2.lineTo(numoftri2[k].x2+numoftri2[k].X,numoftri2[k].y2+numoftri2[k].Y);
+   contex2.closePath();
+   contex2.fillStyle = triangleColors2[numoftri2[k].col];
+   contex2.fill();
+   }
+   }
+  
+  
+  function  getModule2MousePosition(canvasObj2, e)
+ {
+ var rect = canvasObj2.getBoundingClientRect(),
+ scaleX = canvasObj2.width / rect.width,
+ scaleY = canvasObj2.height / rect.height;
+ return {
+ x: (e.clientX - rect.left) * scaleX,
+ y: (e.clientY - rect.top) * scaleY
+   }
+ }
+ 
+ 
+ function Module2Clr()
+ {
+ numoftri2 = [];
+ flag2 = false;
+ drag = false;
+ contex2.clearRect(0,0,canvasObj2.width,canvasObj2.height);
+}
+
+
+
+</script>
+
+</body>
+</html>
